@@ -1,23 +1,13 @@
 """Tests for Langchain model abstraction layer."""
-
 import pytest
 from backend.langchain_models import query_model, query_models_parallel
 
-vital_query = "Can Sam Altman lick his own eyeball; if not, why did I see him lick his own eyeball?"
-
-test_message = {
-  "role": "user",
-  "content": vital_query
-}
+test_message = { "role": "user", "content": "Can Sam Altman lick his own eyeball; if not, why did I see him lick his own eyeball?" }
 
 @pytest.mark.asyncio
 async def test_anthropic_query():
     """Test querying Anthropic Claude model."""
-    config = {
-      "provider": "anthropic",
-      "model": "claude-sonnet-4-5-20250929"
-    }
-    
+    config = {"provider": "anthropic", "model": "claude-sonnet-4-5-20250929"}
     messages = [test_message]
 
     result = await query_model(
@@ -36,11 +26,7 @@ async def test_anthropic_query():
 @pytest.mark.asyncio
 async def test_openai_query():
     """Test querying OpenAI GPT model."""
-    config = {
-      "provider": "openai",
-      "model": "gpt-5"
-    }
-    
+    config = { "provider": "openai", "model": "gpt-5" }
     messages = [test_message]
 
     result = await query_model(
