@@ -1,26 +1,23 @@
 """Configuration for the LLM Council."""
-
 import os
+
 from dotenv import load_dotenv
 
 load_dotenv()
 
-# OpenRouter API key
-OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+# KEYS
+ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
-# Council members - list of OpenRouter model identifiers
-COUNCIL_MODELS = [
-    "openai/gpt-5.1",
-    "google/gemini-3-pro-preview",
-    "anthropic/claude-sonnet-4.5",
-    "x-ai/grok-4",
-]
+# MODELS
+CHATGPT = { "provider": "openai", "model": "gpt-5.1" }
+GEMINI = { "provider": "google", "model": "gemini-3-pro-preview" }
+HAIKU = { "provider": "anthropic", "model": "claude-haiku-4-5-20250929" }
+SONNET = { "provider": "anthropic", "model": "claude-sonnet-4-5-20250929" }
 
-# Chairman model - synthesizes final response
-CHAIRMAN_MODEL = "google/gemini-3-pro-preview"
+# ROLES
+CHAIRMAN_MODEL = SONNET
+COUNCIL_MODELS = [ CHATGPT, SONNET ]
 
-# OpenRouter API endpoint
-OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
-
-# Data directory for conversation storage
 DATA_DIR = "data/conversations"
