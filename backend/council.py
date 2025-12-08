@@ -2,7 +2,7 @@
 
 from typing import List, Dict, Any, Tuple
 from .langchain_models import query_models_parallel, query_model
-from .config import COUNCIL_MODELS, CHAIRMAN_MODEL, HAIKU
+from .config import COUNCIL_MODELS, CHAIRMAN_MODEL, HAIKU, SONNET
 
 
 async def stage1_collect_responses(user_query: str) -> List[Dict[str, Any]]:
@@ -259,7 +259,7 @@ async def generate_conversation_title(user_query: str) -> str:
     messages = [{"role": "user", "content": title_prompt}]
 
     # Use CLAUDE HAIKU for title generation (fast and cheap)
-    response = await query_model(HAIKU, messages, timeout=30.0)
+    response = await query_model(SONNET, messages, timeout=30.0)
 
     if response is None:
         # Fallback to a generic title

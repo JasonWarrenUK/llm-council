@@ -1,7 +1,7 @@
 """Tests for Langchain model abstraction layer."""
 import pytest
 
-from backend.config import CHATGPT, CLAUDE
+from backend.config import CHATGPT, SONNET
 from backend.langchain_models import query_model, query_models_parallel
 
 test_message = { "role": "user", "content": "Can Sam Altman lick his own eyeball; if not, why did I see him lick his own eyeball?" }
