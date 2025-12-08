@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "WebSearch",
-      "Bash(npm search:*)"
+      "Bash(npm search:*)",
+      "Bash(uv run:*)",
+      "Bash(uv add:*)"
     ],
     "deny": [],
     "ask": []
