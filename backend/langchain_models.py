@@ -6,7 +6,7 @@ from typing import List, Dict, Optional, Any
 
 from langchain_anthropic import ChatAnthropic
 from langchain_openai import ChatOpenAI
-from langchain_google_genai import ChatGoogleGenerativeAI
+# from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
 
 
@@ -32,9 +32,9 @@ def _get_model_instance(model_config: Dict[str, str]) -> Any:
     elif provider == "openai":
         api_key = os.getenv("OPENAI_API_KEY")
         return ChatOpenAI(model=model_name, openai_api_key=api_key)
-    elif provider == "google":
-        api_key = os.getenv("GOOGLE_API_KEY")
-        return ChatGoogleGenerativeAI(model=model_name, google_api_key=api_key)
+    # elif provider == "google":
+    #     api_key = os.getenv("GOOGLE_API_KEY")
+    #     return ChatGoogleGenerativeAI(model=model_name, google_api_key=api_key)
     else:
         raise ValueError(f"Unsupported provider: {provider}")
 

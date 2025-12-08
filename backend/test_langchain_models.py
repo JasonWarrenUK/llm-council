@@ -5,15 +5,26 @@ from backend.langchain_models import query_model, query_models_parallel
 
 vital_query = "Can Sam Altman lick his own eyeball; if not, why did I see him lick his own eyeball?"
 
-test_message = {"role": "user", "content": vital_query}
+test_message = {
+  "role": "user",
+  "content": vital_query
+}
 
 @pytest.mark.asyncio
 async def test_anthropic_query():
     """Test querying Anthropic Claude model."""
-    config = {"provider": "anthropic", "model": "claude-sonnet-4-5-20250929"}
+    config = {
+      "provider": "anthropic",
+      "model": "claude-sonnet-4-5-20250929"
+    }
+    
     messages = [test_message]
 
-    result = await query_model(config, messages, temperature=0.0)
+    result = await query_model(
+      config,
+      messages,
+      temperature=0.0
+    )
 
     assert result is not None, "Result should not be None"
     assert "content" in result, "Result should have 'content' key"
@@ -25,10 +36,18 @@ async def test_anthropic_query():
 @pytest.mark.asyncio
 async def test_openai_query():
     """Test querying OpenAI GPT model."""
-    config = {"provider": "openai", "model": "gpt-5"}
+    config = {
+      "provider": "openai",
+      "model": "gpt-5"
+    }
+    
     messages = [test_message]
 
-    result = await query_model(config, messages, temperature=0.0)
+    result = await query_model(
+      config,
+      messages,
+      temperature=0.0
+    )
 
     assert result is not None, "Result should not be None"
     assert "content" in result, "Result should have 'content' key"
@@ -37,19 +56,17 @@ async def test_openai_query():
     print(f"✓ OpenAI response: {result['content'][:50]}...")
 
 
-@pytest.mark.asyncio
-async def test_google_query():
-    """Test querying Google Gemini model."""
-    config = {"provider": "google", "model": "gemini-3-pro-preview"}
-    messages = [test_message]
-
-    result = await query_model(config, messages, temperature=0.0)
-
-    assert result is not None, "Result should not be None"
-    assert "content" in result, "Result should have 'content' key"
-    assert isinstance(result["content"], str), "Content should be a string"
-    assert len(result["content"]) > 0, "Content should not be empty"
-    print(f"✓ Google response: {result['content'][:50]}...")
+# @pytest.mark.asyncio
+# async def test_google_query():
+#     """Test querying Google Gemini model."""
+#     config = {"provider": "google", "model": "gemini-3-pro-preview"}
+#     messages = [test_message]
+#     result = await query_model(config, messages, temperature=0.0)
+#     assert result is not None, "Result should not be None"
+#     assert "content" in result, "Result should have 'content' key"
+#     assert isinstance(result["content"], str), "Content should be a string"
+#     assert len(result["content"]) > 0, "Content should not be empty"
+#     print(f"✓ Google response: {result['content'][:50]}...")
 
 
 @pytest.mark.asyncio
@@ -58,9 +75,12 @@ async def test_parallel_queries():
     model_configs = [
         {"provider": "anthropic", "model": "claude-sonnet-4-5-20250929"},
         {"provider": "openai", "model": "gpt-5"},
-        {"provider": "google", "model": "gemini-3-pro-preview"},
+        # {"provider": "google", "model": "gemini-3-pro-preview"},
     ]
-    messages = [{"role": "user", "content": "What is 2+2? Answer with just the number, unless the answer is 4; if it is 4, tell me whether Sam Altman can lick his own eyeball."}]
+    messages = [{
+      "role": "user",
+      "content": "What is 2+2? Answer with just the number, unless the answer is 4; if it is 4, tell me whether Sam Altman can lick his own eyeball."
+    }]
 
     import time
     start_time = time.time()
@@ -69,12 +89,13 @@ async def test_parallel_queries():
 
     # Verify results
     assert isinstance(results, dict), "Results should be a dict"
-    assert len(results) == 3, "Should have 3 results"
+    # assert len(results) == 3, "Should have 3 results"
+    assert len(results) == 2, "Should have 2 results until we get a gemini key"
 
     # Check each model returned a result
     assert "anthropic/claude-sonnet-4-5-20250929" in results
     assert "openai/gpt-5" in results
-    assert "google/gemini-3-pro-preview" in results
+    # assert "google/gemini-3-pro-preview" in results
 
     # Verify at least one successful response
     successful = [r for r in results.values() if r is not None]
