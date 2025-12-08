@@ -1,13 +1,14 @@
 """Langchain-based model abstraction for querying LLMs."""
 
 import asyncio
-import os
 from typing import List, Dict, Optional, Any
 
 from langchain_anthropic import ChatAnthropic
 from langchain_openai import ChatOpenAI
 # from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
+
+from .config import ANTHROPIC_API_KEY, OPENAI_API_KEY, GOOGLE_API_KEY
 
 
 def _get_model_instance(model_config: Dict[str, str]) -> Any:
@@ -27,14 +28,11 @@ def _get_model_instance(model_config: Dict[str, str]) -> Any:
     model_name = model_config.get("model")
 
     if provider == "anthropic":
-        api_key = os.getenv("ANTHROPIC_API_KEY")
-        return ChatAnthropic(model=model_name, anthropic_api_key=api_key)
+        return ChatAnthropic(model=model_name, anthropic_api_key=ANTHROPIC_API_KEY)
     elif provider == "openai":
-        api_key = os.getenv("OPENAI_API_KEY")
-        return ChatOpenAI(model=model_name, openai_api_key=api_key)
+        return ChatOpenAI(model=model_name, openai_api_key=OPENAI_API_KEY)
     # elif provider == "google":
-    #     api_key = os.getenv("GOOGLE_API_KEY")
-    #     return ChatGoogleGenerativeAI(model=model_name, google_api_key=api_key)
+    #     return ChatGoogleGenerativeAI(model=model_name, google_api_key=GOOGLE_API_KEY)
     else:
         raise ValueError(f"Unsupported provider: {provider}")
 
