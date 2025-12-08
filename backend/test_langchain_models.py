@@ -9,7 +9,7 @@ test_message = { "role": "user", "content": "Can Sam Altman lick his own eyeball
 @pytest.mark.asyncio
 async def test_anthropic_query():
     """Test querying Anthropic Claude model."""
-    config = CLAUDE
+    config = SONNET
     messages = [test_message]
     result = await query_model(config, messages, temperature=0.0)
     assert result is not None, "Result should not be None"
@@ -48,7 +48,7 @@ async def test_openai_query():
 @pytest.mark.asyncio
 async def test_parallel_queries():
     """Test querying multiple models in parallel."""
-    model_configs = [ CLAUDE, CHATGPT ] # GEMINI
+    model_configs = [ SONNET, CHATGPT ] # GEMINI
     messages = [{
       "role": "user",
       "content": "What is 2+2? Answer with just the number, unless the answer is 4; if it is 4, tell me whether Sam Altman can lick his own eyeball."
@@ -99,13 +99,13 @@ async def test_failure_handling():
 @pytest.mark.asyncio
 async def test_parallel_with_failure():
     """Test that parallel queries continue when one fails."""
-    model_configs = [ CLAUDE, CHATGPT ] # GEMINI
+    model_configs = [ SONNET, CHATGPT ] # GEMINI
     messages = [{"role": "user", "content": "Say hello"}]
 
     results = await query_models_parallel(model_configs, messages)
 
     assert isinstance(results, dict), "Results should be a dict"
-    
+
     # assert len(results) == 3, "Should have 3 results (including failures)"
     assert len(results) == 2, "Should have 2 results (including failures) until we get a gemini key"
 
@@ -122,7 +122,7 @@ async def test_parallel_with_failure():
 @pytest.mark.asyncio
 async def test_message_conversion():
     """Test that different message roles are handled correctly."""
-    config = {"provider": "anthropic", "model": "claude-sonnet-4-5-20250929"}
+    config = SONNET
     messages = [
         {"role": "system", "content": "You are a helpful assistant."},
         {"role": "user", "content": "What is your role?"},
