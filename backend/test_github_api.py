@@ -38,21 +38,35 @@ def test_user_stats():
 
 
 def test_list_repos():
-    """Test listing user repositories."""
+    """Test listing user repositories including organization repos."""
     print("\n" + "=" * 60)
-    print("TEST: List User Repositories")
+    print("TEST: List User Repositories (Including Organizations)")
     print("=" * 60)
 
     username = "JasonWarrenUK"  # Replace with your GitHub username
-    repos = list_user_repos(username, since_date="2024-01-01")
+    repos = list_user_repos(username, since_date="2024-01-01", include_orgs=True)
 
     if repos:
+        # Count user vs org repos
+        user_repos = [r for r in repos if r['owner_type'] == 'User']
+        org_repos = [r for r in repos if r['owner_type'] == 'Organization']
+
         print(f"✓ Found {len(repos)} repositories (since 2024-01-01)")
+        print(f"  - {len(user_repos)} personal repos")
+        print(f"  - {len(org_repos)} organization repos")
+
         print("\nFirst 5 repos:")
         for repo in repos[:5]:
             lang = repo['language'] or "N/A"
-            print(f"  • {repo['full_name']} ({lang})")
+            owner_badge = "🏢" if repo['owner_type'] == 'Organization' else "👤"
+            print(f"  {owner_badge} {repo['full_name']} ({lang})")
             print(f"    {repo['description'][:80] if repo['description'] else 'No description'}")
+
+        if org_repos:
+            print(f"\n✓ Organization access verified! Found {len(org_repos)} org repos")
+        else:
+            print("\n⚠️  No organization repos found (may not be part of any orgs)")
+
         return True, repos
     else:
         print("✗ No repositories found or error occurred")
@@ -149,6 +163,59 @@ def test_get_file(repo_full_name, file_path):
         return False
 
 
+def test_specific_org_repo():
+    """Test access to a specific organization repository."""
+    print("\n" + "=" * 60)
+    print("TEST: Access Specific Organization Repo")
+    print("=" * 60)
+
+    org_repo = "foundersandcoders/rhea"
+    username = "JasonWarrenUK"
+
+    print(f"Testing access to {org_repo}...")
+
+    # Test 1: Can we access the repo at all?
+    print("\n1. Fetching README from org repo...")
+    readme = get_file_contents(org_repo, "README.md")
+
+    if readme:
+        print(f"   ✓ Successfully accessed {org_repo}")
+        print(f"   README length: {len(readme)} bytes")
+    else:
+        print(f"   ✗ Cannot access {org_repo}")
+        print("   This may be due to:")
+        print("   - Repo is private and token lacks access")
+        print("   - Repo doesn't exist or was renamed")
+        print("   - Token needs 'read:org' scope")
+        return False
+
+    # Test 2: Can we see commits by this user?
+    print(f"\n2. Fetching commits by {username} in org repo...")
+    commits = get_commits_by_author(org_repo, username, since_date="2024-01-01")
+
+    if commits:
+        print(f"   ✓ Found {len(commits)} commits by {username}")
+        if commits:
+            print(f"   Most recent: {commits[0]['date'][:10]} - {commits[0]['message'][:50]}")
+    else:
+        print(f"   ⚠️  No commits found by {username} in this repo")
+        print("   (This is okay if you haven't committed to this repo)")
+
+    # Test 3: Can we see PRs by this user?
+    print(f"\n3. Fetching PRs by {username} in org repo...")
+    prs = get_prs_by_author(org_repo, username)
+
+    if prs:
+        print(f"   ✓ Found {len(prs)} PRs by {username}")
+        if prs:
+            print(f"   Latest PR: #{prs[0]['number']} - {prs[0]['title'][:50]}")
+    else:
+        print(f"   ⚠️  No PRs found by {username} in this repo")
+        print("   (This is okay if you haven't created PRs here)")
+
+    return True
+
+
 if __name__ == "__main__":
     print("\n" + "=" * 60)
     print("GitHub API Wrapper Test Suite")
@@ -177,6 +244,9 @@ if __name__ == "__main__":
 
     # Test 6: Search code
     test_search_code()
+
+    # Test 7: Specific org repo access
+    test_specific_org_repo()
 
     print("\n" + "=" * 60)
     print("Test Suite Complete")
