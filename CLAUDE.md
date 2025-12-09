@@ -45,6 +45,48 @@ LLM Council is a 3-stage deliberation system where multiple LLMs collaboratively
 - POST `/api/conversations/{id}/message` returns metadata in addition to stages
 - Metadata includes: label_to_model mapping and aggregate_rankings
 
+**`github_api.py`** - GitHub Integration
+- Direct GitHub REST API integration using PyGithub library
+- Comprehensive repository discovery across personal and organization repos
+- Uses `GITHUB_PERSONAL_ACCESS_TOKEN` from config.py/.env
+- **Architecture Decision**: Using direct API calls instead of MCP for immediate functionality
+  - MCP (Model Context Protocol) integration earmarked for Phase 3 (autonomous tool calling)
+  - Remote MCP servers (api.githubcopilot.com) designed for IDE clients, not programmatic Python
+  - Docker MCP server option available for future integration
+
+**Core Functions**:
+- `list_user_repos()`: Get repos owned by user or orgs they're members of
+  - Parameters: `include_orgs`, `include_forks`, `since_date`
+  - Returns repos with `owner_type` field (User vs Organization)
+  - Handles pagination automatically via PyGithub
+- `get_commits_by_author()`: Fetch commits from specific repo
+  - Parameters: `max_results` to prevent rate limit exhaustion
+  - Timezone-aware datetime handling for date filters
+- `get_prs_by_author()`: Get pull requests by author
+- `search_code_by_author()`: Search code across repositories
+- `get_file_contents()`: Retrieve file contents from any accessible repo
+- `get_user_stats()`: User profile statistics
+
+**Advanced Organization Discovery**:
+- `list_org_repos_with_user_commits()`: Search specific org for user's contributions
+  - Useful for large orgs (193+ repos) where pagination is critical
+  - Sorts repos by update date descending to find recent work first
+- `list_all_repos_with_contributions()`: **Most comprehensive discovery method**
+  - 3-step process:
+    1. Get direct member repos via `user.get_repos(type='all')`
+    2. Discover ALL orgs programmatically via GitHub Search Commits API
+       - Uses `search_commits()` with query: `author:username committer-date:>=YYYY-MM-DD`
+       - Sorts by `committer-date` descending to prioritize recent orgs
+       - Extracts unique org names from commit results
+    3. Search each discovered org for user's contributions
+  - Solves limitation: `user.get_orgs()` only returns formal member orgs, misses contributor orgs
+  - Successfully tested: finds 44 repos across 6 orgs including foundersandcoders/rhea
+
+**Testing Files**:
+- `test_github_api.py`: Comprehensive test suite for all API functions
+- `test_pagination.py`: Verifies pagination and org repo discovery (rhea test)
+- `test_org_repo_simple.py`: Direct API access validation for specific org repo
+
 ### Frontend Structure (`frontend/src/`)
 
 **`App.jsx`**
@@ -131,6 +173,13 @@ Models are hardcoded in `backend/config.py`. Chairman can be same or different f
 2. **CORS Issues**: Frontend must match allowed origins in `main.py` CORS middleware
 3. **Ranking Parse Failures**: If models don't follow format, fallback regex extracts any "Response X" patterns in order
 4. **Missing Metadata**: Metadata is ephemeral (not persisted), only available in API responses
+5. **GitHub API Timezone Issues**: Always use timezone-aware datetimes when comparing with GitHub timestamps
+   - Fix: `datetime.fromisoformat(date).replace(tzinfo=timezone.utc)`
+6. **GitHub API Rate Limits**: Authenticated API allows 5000 requests/hour
+   - Use `max_results` parameters to limit expensive queries
+   - Pagination iterators consume one request per page
+7. **Organization Repo Discovery**: `user.get_repos()` misses orgs where user is contributor but not member
+   - Solution: Use `list_all_repos_with_contributions()` which discovers orgs via commit search
 
 ## Future Enhancement Ideas
 
@@ -140,10 +189,27 @@ Models are hardcoded in `backend/config.py`. Chairman can be same or different f
 - Model performance analytics over time
 - Custom ranking criteria (not just accuracy/insight)
 - Support for reasoning models (o1, etc.) with special handling
+- **Phase 3: MCP Integration** - Enable autonomous tool calling with GitHub data
+  - Docker-based MCP server for standardized tool interface
+  - Allow council models to query GitHub API during deliberation
+  - Provide code context when answering programming questions
+- GitHub Integration Enhancements:
+  - Cache repository data to reduce API calls
+  - Support GitHub Enterprise instances
+  - Add PR review comment extraction
+  - Code contribution visualization/analytics
 
 ## Testing Notes
 
+**OpenRouter Testing**:
 Use `test_openrouter.py` to verify API connectivity and test different model identifiers before adding to council. The script tests both streaming and non-streaming modes.
+
+**GitHub API Testing**:
+- `python -m backend.test_github_api` - Comprehensive test suite for all GitHub functions
+- `python -m backend.test_pagination` - Verifies org repo discovery (foundersandcoders/rhea test)
+- `python -m backend.test_org_repo_simple` - Quick validation of specific org repo access
+- All tests require `GITHUB_PERSONAL_ACCESS_TOKEN` in `.env`
+- Token needs `repo` scope for private repos, `read:org` for org access
 
 ## Data Flow Summary
 
