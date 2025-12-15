@@ -87,6 +87,37 @@ LLM Council is a 3-stage deliberation system where multiple LLMs collaboratively
 - `test_pagination.py`: Verifies pagination and org repo discovery (rhea test)
 - `test_org_repo_simple.py`: Direct API access validation for specific org repo
 
+**`vector_db.py`** - Chroma Vector Database Interface (Phase 2)
+- Clean interface to ChromaDB for storing and querying embedded GitHub artifacts
+- Local file-based storage in `./chroma_db/` (gitignored)
+- Uses ChromaDB's default embedding model (all-MiniLM-L6-v2) for semantic search
+
+**Core Functions**:
+- `get_chroma_client()`: Returns persistent client pointing to `./chroma_db/`
+  - Creates directory if needed
+  - Configures settings (telemetry disabled, reset allowed)
+- `get_or_create_collection()`: Manages collections (like database tables)
+  - Default collection: "github_knowledge"
+  - Metadata includes: `description`, `created_at`, `version`
+- `add_documents()`: Adds documents with metadata and unique IDs
+  - Document IDs format: `{repo}:{artifact_type}:{identifier}:{chunk}`
+  - Auto-enriches metadata with `indexed_at` timestamp
+  - Validates list lengths match
+- `query_collection()`: Semantic search with optional metadata filtering
+  - Returns: documents, metadatas, ids, distances (similarity scores)
+  - Supports MongoDB-style where filters (`$and`, `$or`, `$gte`, etc.)
+  - Lower distance = more similar
+- `delete_collection()`: Cleanup for re-indexing scenarios
+- `get_collection_stats()`: Document count, sample IDs, artifact type distribution
+- `initialize_knowledge_base()`: Convenience function for quick setup (returns client + collection tuple)
+
+**Implementation Details**:
+- Educational docstrings with TypeScript analogies for learning
+- Full type hints for IDE support
+- Includes runnable demo: `uv run python -m backend.vector_db`
+- First run downloads embedding model (~79MB) to `~/.cache/chroma/`
+- Collection is idempotent (get_or_create pattern)
+
 ### Frontend Structure (`frontend/src/`)
 
 **`App.jsx`**

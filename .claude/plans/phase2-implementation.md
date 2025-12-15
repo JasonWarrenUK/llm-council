@@ -48,9 +48,9 @@ Content outline:
 - TypeScript analogies (like IndexedDB but for semantic search)
 - Basic operations (create collection, add documents, query)
 
-**2.1.3: Implement `backend/vector_db.py`**
+**2.1.3: Implement `backend/vector_db.py`** ✅ **COMPLETE**
 
-Functions to implement:
+Functions implemented:
 ```python
 def get_chroma_client() -> chromadb.PersistentClient:
     """Returns persistent client pointing to ./chroma_db/"""
@@ -82,13 +82,20 @@ def delete_collection(client: chromadb.PersistentClient, name: str) -> None:
 
 def get_collection_stats(collection: chromadb.Collection) -> Dict[str, Any]:
     """Get stats: document count, metadata summary"""
+
+def initialize_knowledge_base() -> tuple[chromadb.PersistentClient, chromadb.Collection]:
+    """Convenience function to initialize both client and collection"""
 ```
 
-**Implementation notes**:
-- Use `chromadb.PersistentClient(path="./chroma_db")` for local storage
-- Collection metadata should include: `description`, `created_at`, `last_indexed_at`
-- Document IDs format: `{repo_name}:{artifact_type}:{identifier}` (e.g., `user/repo:commit:abc123`)
-- Add educational comments explaining ChromaDB concepts for TypeScript developer
+**Implementation details**:
+- Uses `chromadb.PersistentClient(path="./chroma_db")` for local storage
+- Collection metadata includes: `description`, `created_at`, `version`
+- Document IDs format: `{repo_name}:{artifact_type}:{identifier}:{chunk}` (e.g., `user/repo:commit:abc123:0`)
+- Metadata auto-enriched with `indexed_at` timestamp on add
+- Comprehensive TypeScript analogies in docstrings for learning
+- Includes runnable demo script: `uv run python -m backend.vector_db`
+- Uses ChromaDB's default embedding model (all-MiniLM-L6-v2) downloaded on first run
+- Full type hints for IDE support
 
 **2.1.4: Create tests (`backend/test_vector_db.py`)**
 
