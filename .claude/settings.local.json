@@ -4,9 +4,13 @@
       "WebSearch",
       "Bash(npm search:*)",
       "Bash(uv run:*)",
-      "Bash(uv add:*)"
+      "Bash(uv add:*)",
+      "Bash(cat:*)",
+      "Bash(python -m backend.test_langchain_models:*)",
+      "Bash(test:*)"
     ],
     "deny": [],
     "ask": []
-  }
+  },
+  "outputStyle": "quality-dev-mentor"
 }
