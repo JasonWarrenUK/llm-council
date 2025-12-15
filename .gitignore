@@ -15,6 +15,9 @@ wheels/
 # Data files
 data/
 
+# Vector database (Phase 2)
+chroma_db/
+
 # Frontend
 frontend/node_modules/
 frontend/dist/
